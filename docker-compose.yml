@@ -42,3 +42,10 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: 1
     ports:
      - 3310:3306
+  server1:
+    container_name: server1
+    build:
+      context: "./server"
+    restart: always
+    ports:
+     - 3311:3306
