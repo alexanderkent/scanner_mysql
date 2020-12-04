@@ -115,3 +115,31 @@ ConnectionId: 10
 AuthPluginName: caching_sha2_password
 StatusFlags: 2
 ```
+
+#### Interesting Observation
+Whilst performing a few quick sanity checks against MySQL assets discovered on the internet, the `Connection ID` field caught my eye. Specifically, at least during testing, I noticed freshly started MySQL instances would have a low `Connection ID` whereas some systems I stumbled across yielded a sizable number.
+
+The MySQL documentation states:
+> Returns the connection ID (thread ID) for the connection. Every connection has an ID that is unique among the set of currently connected clients. The value returned by CONNECTION_ID() is the same type of value as displayed in the ID column of the INFORMATION_SCHEMA.PROCESSLIST table, the Id column of SHOW PROCESSLIST output, and the PROCESSLIST_ID column of the Performance Schema threads table.`
+
+Assuming this holds true not just for TCP connections but UNIX sockets and windows named pipes as well; I briefly postulated whether or not this could have value beyond basic utilization insights. 
+
+For example, given identical MySQL versions but sizeably different connection id information:
+
+
+| System  | Connection ID  |
+|---|---|
+| system1 mysql:5.7 | 3244 |
+| system2 mysql:5.7 | 105001700 |
+
+One may infer (probabilistically):
+* mysql service recently started on system1 (uptime)
+* system1 utilization is lower than system2
+* given a relatively new 0-day/CVE for which remediation requires a service restart, system1 might be freshly patched, whereas system2 might still be vulnerable
+
+
+
+### References
+* [MySQL Docs - Protocol::Handshake](https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::Handshake)
+* [MySQL Docs - Connection ID](https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_connection-id)
+* [Writing MySQL Proxy in GO for self-learning: Part 2 — decoding handshake packet](https://medium.com/@alexanderravikovich/writing-mysql-proxy-in-go-for-learning-purposes-part-2-decoding-connection-phase-server-response-7091d87e877e)
