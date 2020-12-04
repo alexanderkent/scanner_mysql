@@ -51,3 +51,67 @@ By way of background, a MySQL server responds to a client connection with a hand
 |  < 3.21.0  | HandshakeV9 | 
 
 Having received a valid handshake packet, a MySQL client will reply with either a `SSL Connection Request Packet` and then a `Handshake Response Packet` or merely a `Handshake Response Packet` when SSL is not used. This creates an additional opportunity to gather asset information such as server capabilities and supported cipher suites. However, for the purpose of this assessment, no data is ever sent to the server beyond the initial TCP connection.
+
+#### Response Samples
+
+A typical `HandshakeV10` response:
+```
+nc localhost 3306 | xxd
+00000000: 4a00 0000 0a38 2e30 2e32 3200 0900 0000  J....8.0.22.....
+00000010: 7b76 1b3e 7269 5638 00ff ffff 0200 ffc7  {v.>riV8........
+00000020: 1500 0000 0000 0000 0000 0001 1e61 4863  .............aHc
+00000030: 5643 2a3e 5b1c 7e00 6361 6368 696e 675f  VC*>[.~.caching_
+00000040: 7368 6132 5f70 6173 7377 6f72 6400       sha2_password.
+```
+
+For `db3`, the `MYSQL_ROOT_HOST` configuration produces an quasi-unexpected response:
+```
+nc localhost 3308 | xxd
+00000000: 4300 0000 ff6a 0448 6f73 7420 2731 3732  C....j.Host '172
+00000010: 2e32 302e 302e 3127 2069 7320 6e6f 7420  .20.0.1' is not 
+00000020: 616c 6c6f 7765 6420 746f 2063 6f6e 6e65  allowed to conne
+00000030: 6374 2074 6f20 7468 6973 204d 7953 514c  ct to this MySQL
+00000040: 2073 6572 7665 72                         server
+```
+
+Lastly, `server1` responds with random data:
+```
+nc localhost 3311 | xxd
+00000000: 2d65 2097 b09d 14cf 806b da0c bde0 828b  -e ......k......
+00000010: 5613 2a9d 8b80 f6b4 53fa 9c2f b0b0 cf0b  V.*.....S../....
+00000020: 7ba3 5ff2 2cf6 f433 9c08 7f4d 859d 164f  {._.,..3...M...O
+00000030: 3b17 17f4 56dd 71f3 530e cde2 b62e 30b1  ;...V.q.S.....0.
+00000040: f76c acca 0d71 d6ea 0135 a853 1264 2559  .l...q...5.S.d%Y
+// omitted for clarity 
+```
+
+#### Protocol
+
+The `HandshakeV10` response provides the following information:
+
+| Field  | Size  | Description|
+|---|---|---|
+| protocol_version | 1 | 0x0a protocol_version|
+| server_version   | (string.NUL) | human-readable server version|
+| connection_id | 4 | connection id |
+| auth_plugin_data_part_1| (string.fix_len) [len=8] | first 8 bytes of the auth-plugin data
+| filler_1 | 1 | 0x00 |
+| capability_flag_1 | 2 | lower 2 bytes of the Protocol::CapabilityFlags (optional) |
+| character_set | 1 | default server character-set, only the lower 8-bits Protocol::CharacterSet (optional) |
+| status_flags |  2 | Protocol::StatusFlags (optional) | 
+| capability_flags_2 | 2 | upper 2 bytes of the Protocol::CapabilityFlags |
+| auth_plugin_data_len | 1 | length of the combined auth_plugin_data, if auth_plugin_data_len is > 0|
+| auth_plugin_name |  (string.NUL) | ame of the auth_method that the auth_plugin_data belongs to |
+
+Per, MySQL docs, Bug#59453 the auth-plugin-name is missing the terminating NUL-char in versions prior to 5.5.10 and 5.6.2. 
+
+#### Scanner Output
+The scanner app displays the MySQL banner information as follows:
+```
+localhost:3306
+ProtocolVersion: 10
+ServerVersion: 8.0.22
+ConnectionId: 10
+AuthPluginName: caching_sha2_password
+StatusFlags: 2
+```
