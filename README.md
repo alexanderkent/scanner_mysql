@@ -25,6 +25,29 @@ The test chassis hosts various versions of MySQL and MariaDB servers. In additio
 ### Compiling 
 For convenience a Makefile has been provided.
 ```
-
 make build
 ```
+
+### Running the scanner
+
+To run the scanner against the test chassis
+
+```
+./bin/scanner
+```
+
+To run the scanner against a single target
+```
+./bin/scanner host port
+```
+
+
+### Methodology
+By way of background, a MySQL server responds to a client connection with a handhake packet. Depending on the server version and configuration options different variants of the initial packet are sent. 
+
+| MySQL Version  | Handshake  |
+|---|---|
+| >= 3.21.0 | HandshakeV10 |
+|  < 3.21.0  | HandshakeV9 | 
+
+Having received a valid handshake packet, a MySQL client will reply with either a `SSL Connection Request Packet` and then a `Handshake Response Packet` or merely a `Handshake Response Packet` when SSL is not used. This creates an additional opportunity to gather asset information such as server capabilities and supported cipher suites. However, for the purpose of this assessment, no data is ever sent to the server beyond the initial TCP connection.
