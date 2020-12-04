@@ -1,0 +1,44 @@
+version: '3.1'
+services:
+  db1:
+    image: mysql:latest
+    container_name: db1
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+    ports:
+     - 3306:3306
+  db2:
+      image: mysql:5.7
+      container_name: db2
+      restart: always
+      environment:
+        MYSQL_RANDOM_ROOT_PASSWORD: 1
+      ports:
+      - 3307:3306
+  db3:
+      image: mysql:5.6
+      container_name: db3
+      command: --default-authentication-plugin=mysql_native_password
+      restart: always
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_ROOT_HOST: 192.168.0.48
+      ports:
+      - 3308:3306
+  db4:
+    image: mariadb:latest
+    container_name: db4
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+    ports:
+     - 3309:3306
+  db5:
+    image: mariadb:10.1
+    container_name: db5
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+    ports:
+     - 3310:3306
