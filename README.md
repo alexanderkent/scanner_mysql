@@ -101,7 +101,7 @@ The `HandshakeV10` response provides the following information:
 | status_flags |  2 | Protocol::StatusFlags (optional) | 
 | capability_flags_2 | 2 | upper 2 bytes of the Protocol::CapabilityFlags |
 | auth_plugin_data_len | 1 | length of the combined auth_plugin_data, if auth_plugin_data_len is > 0|
-| auth_plugin_name |  (string.NUL) | ame of the auth_method that the auth_plugin_data belongs to |
+| auth_plugin_name |  (string.NUL) | name of the auth_method that the auth_plugin_data belongs to |
 
 Per, MySQL docs, Bug#59453 the auth-plugin-name is missing the terminating NUL-char in versions prior to 5.5.10 and 5.6.2. 
 

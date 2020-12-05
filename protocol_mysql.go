@@ -202,7 +202,7 @@ type CapabilityFlag uint32
 
 /**
 Each flag is just an number, that can be represented just by having a single bit ON.
-It allows as to use fast bitwise operations. Each flag is just a number with applied << operator,
+It allows us to use fast bitwise operations. Each flag is just a number with applied << operator,
 that is equivalent of multiply by 2
 
 1 = 00000001
